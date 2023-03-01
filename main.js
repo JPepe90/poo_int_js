@@ -27,7 +27,75 @@ class Student {
   get socialMedia() { return this._socialMedia; }
   get approvedCourses() { return this._approvedCourses; }
   get learningPath() { return this._learningPath; }
+
+  PublicarComentario(commentContent) {
+    const comentario = new Comment({
+      content: commentContent,
+      studentName: this._name,
+    });
+
+    comentario.Publicar();
+  }
 }
+
+class freeStudent extends Student {
+  constructor(props) {
+    super(props);
+  }
+
+  approveCourse(course) {
+    if (course.isFree) {
+      super.approvedCourses.push(course);
+    } else {
+      console.warn("No puedes cursar " + course._name + " porque no estas suscripto");
+    }
+  }
+}
+
+class basicStudent extends Student {
+  constructor(props) {
+    super(props);
+  }
+
+  approveCourse(course) {
+    if (course.lang !== 'english') {
+      super.approvedCourses.push(course);
+    } else {
+      console.warn("No puedes cursar " + course._name + " porque el lenguaje no está habilitado");
+    }
+  } 
+}
+
+class expertStudent extends Student {
+  constructor(props) {
+    super(props);
+  }
+
+  approveCourse(course) {
+    super.approvedCourses.push(course);
+  }
+}
+
+class teacherStudent extends Student {
+  constructor(props) {
+    super(props);
+  }
+
+  approveCourse(course) {
+    super.approvedCourses.push(course);
+  }
+
+  PublicarComentario(commentContent) {
+    const comentario = new Comment({
+      content: commentContent,
+      studentName: this._name,
+      studentRole: 'profesor'
+    });
+
+    comentario.Publicar();
+  }
+}
+
 
 class learningPath {
   constructor({
@@ -39,21 +107,23 @@ class learningPath {
   }
 
   get pathName() { return this._pathName; }
-  get courses() { return this.courses; }
 }
 
 class Course {
   constructor ({
     name,
-    classes = [],
+    clase = [],
+    isFree = false,
+    lang = 'spanish',
   }) {
-    this._name = name; // con el guion bajo informamos que no se cambie el atributo name
-    this.classes = classes;
+    this._name = name; 
+    this.clase = clase;
+    this.isFree = isFree;
+    this.lang = lang;
   }
 
   // getter
   get name() { return this._name; }
-  get classes() { return this.classes; }
 
   // setter
   set name(nuevoNombre) {
@@ -63,28 +133,63 @@ class Course {
     } else {
       console.error("Nuevo nombre incluye palabras maliciosas");
     }
-
   }
+
 }
 
 // ----- Clases video
+function playVideo(id) {
+  const urlSecreta = "https://www.urlultrasecreta.com/" + id;
+  console.log("Se está reproduciendo desde la URL" + urlSecreta);
+}
+
+function stopVideo(id) {
+  const urlSecreta = "https://www.urlultrasecreta.com/" + id;
+  console.log("Se está pausando desde la URL" + urlSecreta);
+}
+
 class Clases {
   constructor({
     name,
-    videoURL,
+    videoID,
     resources = [],
     comments = [],
   }) {
     this._name = name;
-    this._videoURL = videoURL;
+    this._videoID = videoID;
     this.resources = resources;
     this.comments = comments;
   }
 
   get name() { return this._name; }
-  get videoURL() { return this._videoURL; }
-  get resources() { return this.resources; }
-  get comments() { return this.comments; }
+  get videoID() { return this._videoID; }
+
+  reproducir() {
+    playVideo(this.videoID);
+  }
+
+  pausar() {  
+    stopVideo(this.videoID);
+  }
+}
+
+class Comment {
+  constructor({
+    content,
+    studentName,
+    studentRole = "estudiante",
+  }) {
+    this.content = content;
+    this.studentName = studentName;
+    this.studentRole =studentRole;
+    this.likes = 0;
+  }
+
+  Publicar() {
+    console.log(this.studentName + " (" + this.studentRole + ")");
+    console.log(this.likes + " likes");
+    console.log("mensaje: " + this.content);
+  }
 }
 
 
@@ -92,6 +197,7 @@ class Clases {
 const cursoProgBasica = new Course({
   name: "Curso gratis de Programacion Basica",
   classes: [],
+  isFree: true,
 });
 
 const cursoDefinitivoHTML = new Course({
@@ -102,6 +208,7 @@ const cursoDefinitivoHTML = new Course({
 const cursoPracticoHTML = new Course({
   name: "Curso Practico de HTML y CSS",
   classes: [],
+  lang: 'english',
 });
 
 const cursoDataBusiness = new Course({
@@ -164,16 +271,34 @@ const escuelaVgs = new learningPath({
 
 
 // ----- Estudiantes
-const Javier = new Student({
+const Javier = new freeStudent({
   name: 'Javier Pepe',
   email: 'javier@net.com',
   username: 'jpepe90',
   facebook: 'javier pepe'
 });
 
-const Pablo = new Student({
+const Pablo = new basicStudent({
   name: 'Pablo Ruiz',
   email: 'pablo@lancer.com',
   username: 'pruiz22',
   twitter: 'prz_'
+});
+
+const Miguel = new expertStudent({
+  name: 'Miguel Sanz',
+  email: 'msanz@placer.com',
+  username: 'msanzp',
+  facebook: 'miguel sanz',
+  learningPaths: [
+    escuelaWeb,
+    escuelaData,
+  ],
+});
+
+const Freddy = new teacherStudent({
+  name: 'Freddy Vega',
+  email: 'freddy@lancer.com',
+  username: 'freddd',
+  twitter: 'frdvg'
 })
